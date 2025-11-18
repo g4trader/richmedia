@@ -6,116 +6,195 @@
     <meta name="ad.size" content="width=970,height=250">
     <title>Vestibular 970x250</title>
     
-    <!-- Google Ad Manager ClickTag Standard -->
+    <!-- Google Ad Manager ClickTag -->
     <script type="text/javascript">
         var clickTag = "https://www.suauniversidade.com.br/vestibular"; 
     </script>
 
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CDN (For testing. In strict production, inline CSS is often preferred to reduce requests) -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Roboto', sans-serif; background: #000; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Roboto', sans-serif; background: #111827; /* gray-900 */ }
         .font-display { font-family: 'Montserrat', sans-serif; }
         
-        /* Custom Animations */
-        .slide { opacity: 0; transition: opacity 0.7s ease-in-out; z-index: 0; pointer-events: none; }
-        .slide.active { opacity: 1; z-index: 10; pointer-events: auto; }
+        /* Animations mirroring React Transition Logic */
         
-        .slide-content { transform: translateX(-40px); transition: transform 0.7s ease-out; transition-delay: 0.1s; }
-        .slide.active .slide-content { transform: translateX(0); }
+        /* Slide Container Fade */
+        .slide { 
+            opacity: 0; 
+            transition: opacity 700ms ease-in-out; 
+            z-index: 0; 
+            pointer-events: none;
+        }
+        .slide.active { 
+            opacity: 1; 
+            z-index: 10; 
+            pointer-events: auto;
+        }
         
-        .slide-img { transform: scale(0.8); opacity: 0; transition: all 1s ease; }
-        .slide.active .slide-img { transform: scale(1); opacity: 1; }
+        /* Left Content Slide In (Text) */
+        /* React: duration-700 delay-100 translate-x-0 vs -translate-x-10 */
+        .slide-content { 
+            transform: translateX(-2.5rem); /* -translate-x-10 */
+            transition: transform 700ms ease-in-out 100ms; 
+        }
+        .slide.active .slide-content { 
+            transform: translateX(0); 
+        }
+        
+        /* Image Scale/Fade */
+        /* React: duration-1000 scale-100 opacity-100 vs scale-75 opacity-0 */
+        .slide-image-wrapper { 
+            transform: scale(0.75); 
+            opacity: 0; 
+            transition: all 1000ms ease-in-out; 
+        }
+        .slide.active .slide-image-wrapper { 
+            transform: scale(1); 
+            opacity: 1; 
+        }
+
+        /* CTA Animation */
+        @keyframes bounce-subtle {
+            0%, 100% { transform: translateY(-5%); animation-timing-function: cubic-bezier(0.8,0,1,1); }
+            50% { transform: translateY(0); animation-timing-function: cubic-bezier(0,0,0.2,1); }
+        }
+        .slide.active .cta-button {
+            animation: bounce-subtle 2s infinite;
+        }
 
         /* Progress Bar */
         @keyframes progress {
-            0% { width: 0%; }
-            100% { width: 100%; }
+            0% { transform: scaleX(0); }
+            100% { transform: scaleX(1); }
         }
-        .progress-bar {
-            animation: progress 5s linear infinite;
+        .animate-progress {
+            animation: progress 5000ms linear infinite;
+            transform-origin: left;
         }
-        .paused .progress-bar {
+        .paused .animate-progress {
             animation-play-state: paused;
         }
 
         /* Modal Animation */
-        .modal-overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        .modal-overlay.open { opacity: 1; pointer-events: auto; }
-        .modal-content { transform: scale(0.9); transition: transform 0.3s; }
-        .modal-overlay.open .modal-content { transform: scale(1); }
+        .modal-backdrop { 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: opacity 200ms ease-in-out; 
+        }
+        .modal-backdrop.open { 
+            opacity: 1; 
+            pointer-events: auto; 
+        }
+        
+        /* Zoom In Animation for Success */
+        @keyframes zoom-in {
+            0% { opacity: 0; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-zoom-in {
+            animation: zoom-in 300ms ease-out forwards;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Main Banner Container 970x250 -->
-    <div id="banner" class="relative w-[970px] h-[250px] overflow-hidden bg-gray-900 group">
+    <!-- Main Container -->
+    <div id="banner-root" class="relative w-[970px] h-[250px] bg-gray-900 overflow-hidden group" onmouseenter="handleMouseEnter()" onmouseleave="handleMouseLeave()">
         
         <!-- Slides Container -->
         <div id="slides-container" class="absolute inset-0 w-full h-full">
-            <!-- Dynamic content will be injected here -->
+            <!-- Generated by JS -->
         </div>
 
-        <!-- Progress Line -->
-        <div class="absolute bottom-0 left-0 h-1 bg-yellow-400/50 z-40 w-0 progress-bar" id="progress"></div>
-
-        <!-- Controls -->
-        <button onclick="prevSlide(event)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-        </button>
-        <button onclick="nextSlide(event)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 cursor-pointer">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        <!-- Controls: Arrows (Group Hover logic handled by CSS group-hover) -->
+        <button onclick="prevSlide(event)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30">
+            <!-- ChevronLeft -->
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="m15 18-6-6 6-6"/></svg>
         </button>
 
-        <!-- ClickTag Layer (Background Click) -->
-        <div onclick="handleExit()" class="absolute inset-0 z-0 cursor-pointer"></div>
+        <button onclick="nextSlide(event)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-2 rounded-full backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30">
+            <!-- ChevronRight -->
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+
+        <!-- Controls: Dots -->
+        <div id="dots-container" class="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2 z-30">
+            <!-- Generated by JS -->
+        </div>
+
+        <!-- Progress Bar -->
+        <div id="progress-bar" class="absolute bottom-0 left-0 h-1 bg-yellow-400/50 z-40 w-full scale-x-0 animate-progress"></div>
     </div>
 
     <!-- Lead Modal -->
-    <div id="modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
-        <div class="modal-content bg-white rounded-xl shadow-2xl w-[400px] overflow-hidden relative">
-            <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-800 z-10">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-            </button>
+    <div id="modal" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative overflow-hidden">
             
-            <div class="bg-blue-900 p-5 text-white">
-                <h3 class="font-display font-bold text-xl">Garanta sua Bolsa</h3>
-                <p id="modal-course" class="text-blue-200 text-sm mt-1">Interesse em: ...</p>
+            <!-- Close Button -->
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-white/70 hover:text-white z-50">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+
+            <!-- Header -->
+            <div class="bg-blue-900 p-6 text-white">
+                <h3 class="font-display font-bold text-2xl">Garanta sua Bolsa</h3>
+                <p class="text-blue-200 text-sm mt-1">Interesse em: <span id="modal-course-name" class="font-bold text-white">...</span></p>
             </div>
 
-            <div class="p-6">
-                <form onsubmit="submitLead(event)" id="lead-form" class="space-y-3">
-                    <input required type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Seu nome completo">
-                    <input required type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm" placeholder="seu@email.com">
-                    <input required type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm" placeholder="(00) 90000-0000">
-                    
-                    <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-lg shadow-md transition-transform active:scale-95">
+            <!-- Body -->
+            <div class="p-6" id="modal-body">
+                <!-- Form State -->
+                <form id="lead-form" onsubmit="submitForm(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
+                        <input required type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Seu nome" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp</label>
+                        <input required type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="(00) 90000-0000" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
+                        <input required type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="seu@email.com" />
+                    </div>
+                    <button 
+                        type="submit" 
+                        id="submit-btn"
+                        class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-lg shadow-md transform transition-all active:scale-95 flex justify-center items-center"
+                    >
                         QUERO ME INSCREVER
                     </button>
+                    <p class="text-xs text-center text-gray-400 mt-2">
+                        Ao enviar, você concorda com nossa Política de Privacidade.
+                    </p>
                 </form>
-                
-                <div id="success-msg" class="hidden text-center py-4">
-                    <div class="inline-flex bg-green-100 text-green-600 rounded-full p-3 mb-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m22 4-12 12-4-4"/></svg>
+
+                <!-- Success State (Hidden by default) -->
+                <div id="success-view" class="hidden flex-col items-center justify-center py-8 text-center space-y-4 animate-zoom-in">
+                    <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m22 4-12 12-4-4"/></svg>
                     </div>
-                    <h4 class="font-bold text-gray-900">Inscrição Enviada!</h4>
-                    <p class="text-xs text-gray-500">Entraremos em contato em breve.</p>
+                    <div>
+                        <h4 class="text-xl font-bold text-gray-900">Inscrição Realizada!</h4>
+                        <p class="text-gray-500">Nossos consultores entrarão em contato em breve.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURATION (Paste your JSON exported from the React App here) ---
+        // --- DATA (Matches constants.ts) ---
         const OFFERS = [
             {
                 id: '1',
                 course: 'Medicina',
-                headline: 'O Futuro da Medicina',
+                headline: 'O Futuro da Medicina Começa Aqui',
                 subtitle: 'Laboratórios de ponta e hospital escola próprio.',
                 discount: 'Bolsas de até 100%',
                 ctaText: 'Inscreva-se Agora',
@@ -136,9 +215,9 @@
             },
             {
                 id: '3',
-                course: 'Engenharia',
+                course: 'Engenharia de Software',
                 headline: 'Programe o Mundo',
-                subtitle: 'Alta empregabilidade e parcerias globais.',
+                subtitle: 'Alta empregabilidade e parcerias com big techs.',
                 discount: 'Matrícula Grátis',
                 ctaText: 'Saiba Mais',
                 colorFrom: 'from-emerald-900',
@@ -149,140 +228,232 @@
 
         // --- STATE ---
         let currentIndex = 0;
-        let interval;
+        let intervalId = null;
         let isPaused = false;
 
-        // --- INITIALIZATION ---
+        // --- DOM ELEMENTS ---
+        const root = document.getElementById('banner-root');
+        const slidesContainer = document.getElementById('slides-container');
+        const dotsContainer = document.getElementById('dots-container');
+        const progressBar = document.getElementById('progress-bar');
+        const modal = document.getElementById('modal');
+        const modalCourseName = document.getElementById('modal-course-name');
+        const modalBody = document.getElementById('modal-body');
+        const leadForm = document.getElementById('lead-form');
+        const successView = document.getElementById('success-view');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // --- ICONS SVG STRINGS ---
+        const ICON_STAR = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3 h-3 text-yellow-400 fill-yellow-400"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+        const ICON_CAP = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>`;
+        const ICON_ARROW = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 group-hover:translate-x-1 transition-transform"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>`;
+        const ICON_LOADER = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5 animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`;
+
+        // --- INIT ---
         function init() {
-            const container = document.getElementById('slides-container');
-            
+            renderSlides();
+            renderDots();
+            startAutoPlay();
+        }
+
+        // --- RENDER ---
+        function renderSlides() {
             OFFERS.forEach((offer, index) => {
                 const slide = document.createElement('div');
                 slide.className = `slide absolute inset-0 w-full h-full ${index === 0 ? 'active' : ''}`;
-                slide.id = `slide-${index}`;
+                slide.dataset.index = index;
                 
+                // HTML Structure mirroring BannerSlide.tsx
                 slide.innerHTML = `
+                    <!-- Background Gradient -->
                     <div class="absolute inset-0 bg-gradient-to-r ${offer.colorFrom} ${offer.colorTo} opacity-95"></div>
-                    <div class="absolute inset-0 opacity-20 mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
                     
-                    <div class="relative z-20 h-full grid grid-cols-12 gap-4 items-center px-8 text-white pointer-events-none">
+                    <!-- Pattern Overlay -->
+                    <div class="absolute inset-0 opacity-20 mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+
+                    <!-- Content Grid -->
+                    <div class="relative z-20 h-full grid grid-cols-12 gap-4 items-center px-8 text-white">
+                        
+                        <!-- Left: Text Content -->
                         <div class="col-span-7 flex flex-col justify-center space-y-2 slide-content">
+                            
+                            <!-- Badge -->
                             <div class="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full w-fit mb-2 border border-white/30">
+                                ${ICON_STAR}
                                 <span class="text-xs font-bold uppercase tracking-wider text-yellow-100">${offer.discount}</span>
                             </div>
-                            <h2 class="font-display font-extrabold text-4xl leading-tight drop-shadow-lg">${offer.headline}</h2>
-                            <p class="font-light text-lg text-gray-100 max-w-lg leading-snug">${offer.subtitle}</p>
+
+                            <!-- Headline -->
+                            <h2 class="font-display font-extrabold text-4xl leading-tight drop-shadow-lg">
+                                ${offer.headline}
+                            </h2>
+
+                            <!-- Subtitle -->
+                            <p class="font-light text-lg text-gray-100 max-w-lg leading-snug">
+                                ${offer.subtitle}
+                            </p>
+                            
+                            <!-- Course Name Tag -->
                             <div class="flex items-center space-x-2 text-sm font-medium opacity-80 mt-1">
+                                ${ICON_CAP}
                                 <span class="uppercase tracking-widest">${offer.course}</span>
                             </div>
                         </div>
-                        
+
+                        <!-- Right: Image & CTA -->
                         <div class="col-span-5 h-full relative flex items-center justify-center">
-                            <div class="absolute right-4 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full border-4 border-white/20 overflow-hidden shadow-2xl slide-img">
-                                <img src="${offer.image}" alt="${offer.course}" class="w-full h-full object-cover">
+                            
+                            <!-- Circular Image Mask -->
+                            <div class="slide-image-wrapper absolute right-4 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full border-4 border-white/20 overflow-hidden shadow-2xl">
+                                <img 
+                                    src="${offer.image}" 
+                                    alt="${offer.course}" 
+                                    class="w-full h-full object-cover"
+                                />
                             </div>
-                            <button onclick="openModal(event, '${offer.course}')" class="pointer-events-auto absolute -bottom-4 right-32 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-lg py-3 px-8 rounded-full shadow-lg flex items-center space-x-2 group transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95 cursor-pointer z-50">
+
+                            <!-- Floating CTA Button -->
+                            <button
+                                onclick="openModal('${index}')"
+                                class="cta-button absolute -bottom-4 right-32 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-lg py-3 px-8 rounded-full shadow-lg shadow-black/30 flex items-center space-x-2 group transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95"
+                            >
                                 <span>${offer.ctaText}</span>
-                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                                ${ICON_ARROW}
                             </button>
                         </div>
                     </div>
                 `;
-                container.appendChild(slide);
+                slidesContainer.appendChild(slide);
             });
-
-            startAutoPlay();
-            
-            // Hover pause logic
-            const banner = document.getElementById('banner');
-            banner.addEventListener('mouseenter', pause);
-            banner.addEventListener('mouseleave', resume);
         }
 
-        // --- CAROUSEL LOGIC ---
-        function showSlide(index) {
-            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
-            document.getElementById(`slide-${index}`).classList.add('active');
-            currentIndex = index;
-            
-            // Reset Animation Progress Bar
-            const bar = document.getElementById('progress');
-            bar.style.animation = 'none';
-            bar.offsetHeight; /* trigger reflow */
-            if (!isPaused) bar.style.animation = 'progress 5s linear infinite';
+        function renderDots() {
+            dotsContainer.innerHTML = '';
+            OFFERS.forEach((_, index) => {
+                const dot = document.createElement('button');
+                dot.onclick = (e) => { e.stopPropagation(); goToSlide(index); };
+                // Matches Controls.tsx logic
+                const isActive = index === currentIndex;
+                dot.className = `w-2 h-2 rounded-full transition-all duration-300 ${isActive ? 'bg-white w-6' : 'bg-white/40 hover:bg-white/70'}`;
+                dotsContainer.appendChild(dot);
+            });
+        }
+
+        // --- LOGIC ---
+        function updateClasses() {
+            // Update Slides
+            Array.from(slidesContainer.children).forEach((slide, idx) => {
+                if (idx === currentIndex) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+
+            // Update Dots
+            Array.from(dotsContainer.children).forEach((dot, idx) => {
+                if (idx === currentIndex) {
+                    dot.className = 'w-2 h-2 rounded-full transition-all duration-300 bg-white w-6';
+                } else {
+                    dot.className = 'w-2 h-2 rounded-full transition-all duration-300 bg-white/40 hover:bg-white/70';
+                }
+            });
+
+            // Reset Progress Bar Animation
+            // Cloning node is a trick to restart CSS animation
+            const newBar = progressBar.cloneNode(true);
+            progressBar.parentNode.replaceChild(newBar, progressBar);
+            // Re-assign global reference
+            // Note: In a real app we might update the reference, here we just query it again if needed or rely on ID
         }
 
         function nextSlide(e) {
-            if(e) e.stopPropagation();
-            let next = (currentIndex + 1) % OFFERS.length;
-            showSlide(next);
+            if (e) e.stopPropagation();
+            currentIndex = (currentIndex + 1) % OFFERS.length;
+            updateClasses();
+            startAutoPlay();
         }
 
         function prevSlide(e) {
-            if(e) e.stopPropagation();
-            let prev = (currentIndex - 1 + OFFERS.length) % OFFERS.length;
-            showSlide(prev);
+            if (e) e.stopPropagation();
+            currentIndex = (currentIndex - 1 + OFFERS.length) % OFFERS.length;
+            updateClasses();
+            startAutoPlay();
+        }
+
+        function goToSlide(index) {
+            currentIndex = index;
+            updateClasses();
+            startAutoPlay();
         }
 
         function startAutoPlay() {
-            clearInterval(interval);
-            interval = setInterval(() => {
-                if (!isPaused) nextSlide();
+            if (intervalId) clearInterval(intervalId);
+            intervalId = setInterval(() => {
+                if (!isPaused && !modal.classList.contains('open')) {
+                    nextSlide();
+                }
             }, 5000);
         }
 
-        function pause() {
+        function handleMouseEnter() {
             isPaused = true;
-            document.getElementById('banner').classList.add('paused');
+            root.classList.add('paused');
         }
 
-        function resume() {
-            if (document.getElementById('modal').classList.contains('open')) return;
-            isPaused = false;
-            document.getElementById('banner').classList.remove('paused');
+        function handleMouseLeave() {
+            if (!modal.classList.contains('open')) {
+                isPaused = false;
+                root.classList.remove('paused');
+            }
         }
 
-        // --- GAM CLICKTAG LOGIC ---
-        function handleExit() {
-            window.open(window.clickTag, '_blank');
-        }
-
-        // --- MODAL LOGIC ---
-        function openModal(e, course) {
-            if(e) e.stopPropagation();
-            pause();
-            document.getElementById('modal-course').innerHTML = `Interesse em: <span class="font-bold text-white">${course}</span>`;
-            document.getElementById('modal').classList.add('open');
+        // --- MODAL ---
+        function openModal(indexStr) {
+            const index = parseInt(indexStr);
+            const offer = OFFERS[index];
+            modalCourseName.innerText = offer.course;
+            modal.classList.add('open');
+            isPaused = true;
         }
 
         function closeModal() {
-            document.getElementById('modal').classList.remove('open');
-            document.getElementById('success-msg').classList.add('hidden');
-            document.getElementById('lead-form').classList.remove('hidden');
-            document.getElementById('lead-form').reset();
-            resume();
+            modal.classList.remove('open');
+            // Reset form state after delay
+            setTimeout(() => {
+                successView.classList.add('hidden');
+                successView.classList.remove('flex');
+                leadForm.classList.remove('hidden');
+                leadForm.reset();
+                isPaused = false;
+                root.classList.remove('paused');
+            }, 300);
         }
 
-        function submitLead(e) {
+        function submitForm(e) {
             e.preventDefault();
-            // Simulate API Call
-            const btn = e.target.querySelector('button');
-            const originalText = btn.innerText;
-            btn.innerText = "Enviando...";
-            btn.disabled = true;
-
+            // Loading state
+            const originalContent = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `${ICON_LOADER} <span class="ml-2">Enviando...</span>`;
+            
             setTimeout(() => {
-                document.getElementById('lead-form').classList.add('hidden');
-                document.getElementById('success-msg').classList.remove('hidden');
-                btn.innerText = originalText;
-                btn.disabled = false;
-                
-                setTimeout(closeModal, 2000);
+                // Success
+                leadForm.classList.add('hidden');
+                successView.classList.remove('hidden');
+                successView.classList.add('flex');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalContent;
+
+                // Close automatically
+                setTimeout(() => {
+                    closeModal();
+                }, 2000);
             }, 1500);
         }
 
-        // Boot
-        window.onload = init;
+        // Start
+        init();
 
     </script>
 </body>
