@@ -31,9 +31,13 @@
                 'from-blue-900', 'to-blue-600',
                 'from-red-900', 'to-red-700',
                 'from-emerald-900', 'to-emerald-600',
+                'from-gray-900', 'to-gray-700',
+                'from-indigo-900', 'to-indigo-600',
+                'from-purple-900', 'to-purple-600',
                 'text-yellow-400', 'fill-yellow-400',
                 'bg-yellow-400', 'hover:bg-yellow-300',
-                'group-hover:translate-x-1'
+                'group-hover:translate-x-1',
+                'border-white/20', 'border-white/30'
             ]
         }
     </script>
@@ -124,7 +128,11 @@
 <body>
 
     <!-- Main Container -->
-    <div id="banner-root" class="relative w-[970px] h-[250px] bg-gray-900 overflow-hidden group" onmouseenter="handleMouseEnter()" onmouseleave="handleMouseLeave()">
+    <!-- Added click handler for ClickTag on the background area -->
+    <div id="banner-root" class="relative w-[970px] h-[250px] bg-gray-900 overflow-hidden group cursor-pointer" 
+         onmouseenter="handleMouseEnter()" 
+         onmouseleave="handleMouseLeave()"
+         onclick="handleBackgroundClick(event)">
         
         <!-- Slides Container -->
         <div id="slides-container" class="absolute inset-0 w-full h-full">
@@ -151,7 +159,7 @@
 
     <!-- Lead Modal -->
     <div id="modal" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative overflow-hidden" onclick="event.stopPropagation()">
             
             <!-- Close Button -->
             <button onclick="closeModal()" class="absolute top-4 right-4 text-white/70 hover:text-white z-50 cursor-pointer">
@@ -251,7 +259,6 @@
         const root = document.getElementById('banner-root');
         const slidesContainer = document.getElementById('slides-container');
         const dotsContainer = document.getElementById('dots-container');
-        // Note: We will update this reference dynamically
         let progressBar = document.getElementById('progress-bar');
         const modal = document.getElementById('modal');
         const modalCourseName = document.getElementById('modal-course-name');
@@ -278,9 +285,10 @@
                 slide.className = `slide absolute inset-0 w-full h-full ${index === 0 ? 'active' : ''}`;
                 slide.dataset.index = index;
                 
+                // We use style for the pattern to ensure it loads even if Tailwind arbitrary value parsing is slow
                 slide.innerHTML = `
                     <div class="absolute inset-0 bg-gradient-to-r ${offer.colorFrom} ${offer.colorTo} opacity-95"></div>
-                    <div class="absolute inset-0 opacity-20 mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                    <div class="absolute inset-0 opacity-20 mix-blend-overlay" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
                     <div class="relative z-20 h-full grid grid-cols-12 gap-4 items-center px-8 text-white">
                         <div class="col-span-7 flex flex-col justify-center space-y-2 slide-content">
                             <div class="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full w-fit mb-2 border border-white/30">
@@ -302,7 +310,7 @@
                             <div class="slide-image-wrapper absolute right-4 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full border-4 border-white/20 overflow-hidden shadow-2xl">
                                 <img src="${offer.image}" alt="${offer.course}" class="w-full h-full object-cover"/>
                             </div>
-                            <button onclick="openModal('${index}')" class="cta-button absolute -bottom-4 right-32 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-lg py-3 px-8 rounded-full shadow-lg shadow-black/30 flex items-center space-x-2 group transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95 cursor-pointer">
+                            <button onclick="openModal(event, '${index}')" class="cta-button absolute -bottom-4 right-32 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-lg py-3 px-8 rounded-full shadow-lg shadow-black/30 flex items-center space-x-2 group transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95 cursor-pointer">
                                 <span>${offer.ctaText}</span>
                                 ${ICON_ARROW}
                             </button>
@@ -340,11 +348,10 @@
             });
 
             // Reset Progress Bar Animation
-            // FIX: Assign the cloned node back to the global variable 'progressBar'
             const newBar = progressBar.cloneNode(true);
             if (progressBar.parentNode) {
                 progressBar.parentNode.replaceChild(newBar, progressBar);
-                progressBar = newBar; // Critical fix: update reference
+                progressBar = newBar; 
             }
         }
 
@@ -389,7 +396,23 @@
             }
         }
 
-        function openModal(indexStr) {
+        // Handle background click for generic clickTag
+        function handleBackgroundClick(e) {
+            // If the click target is a button or inside a button, do nothing (handled by specific logic)
+            if (e.target.closest('button') || e.target.closest('#modal')) {
+                return;
+            }
+            
+            // Otherwise, trigger ClickTag
+            if (typeof window.clickTag !== 'undefined') {
+                window.open(window.clickTag, '_blank');
+            } else {
+                console.log("ClickTag triggered");
+            }
+        }
+
+        function openModal(e, indexStr) {
+            e.stopPropagation(); // Prevent background clickTag
             const index = parseInt(indexStr);
             const offer = OFFERS[index];
             modalCourseName.innerText = offer.course;
