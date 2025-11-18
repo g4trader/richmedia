@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="ad.size" content="width=970,height=250">
+    <title>Vestibular 970x250</title>
+    
+    <!-- Google Ad Manager ClickTag Standard -->
+    <script type="text/javascript">
+        var clickTag = "https://www.suauniversidade.com.br/vestibular"; 
+    </script>
+
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CDN (For testing. In strict production, inline CSS is often preferred to reduce requests) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Roboto', sans-serif; background: #000; }
+        .font-display { font-family: 'Montserrat', sans-serif; }
+        
+        /* Custom Animations */
+        .slide { opacity: 0; transition: opacity 0.7s ease-in-out; z-index: 0; pointer-events: none; }
+        .slide.active { opacity: 1; z-index: 10; pointer-events: auto; }
+        
+        .slide-content { transform: translateX(-40px); transition: transform 0.7s ease-out; transition-delay: 0.1s; }
+        .slide.active .slide-content { transform: translateX(0); }
+        
+        .slide-img { transform: scale(0.8); opacity: 0; transition: all 1s ease; }
+        .slide.active .slide-img { transform: scale(1); opacity: 1; }
+
+        /* Progress Bar */
+        @keyframes progress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+        .progress-bar {
+            animation: progress 5s linear infinite;
+        }
+        .paused .progress-bar {
+            animation-play-state: paused;
+        }
+
+        /* Modal Animation */
+        .modal-overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-content { transform: scale(0.9); transition: transform 0.3s; }
+        .modal-overlay.open .modal-content { transform: scale(1); }
+    </style>
+</head>
+<body>
+
+    <!-- Main Banner Container 970x250 -->
+    <div id="banner" class="relative w-[970px] h-[250px] overflow-hidden bg-gray-900 group">
+        
+        <!-- Slides Container -->
+        <div id="slides-container" class="absolute inset-0 w-full h-full">
+            <!-- Dynamic content will be injected here -->
+        </div>
+
+        <!-- Progress Line -->
+        <div class="absolute bottom-0 left-0 h-1 bg-yellow-400/50 z-40 w-0 progress-bar" id="progress"></div>
+
+        <!-- Controls -->
+        <button onclick="prevSlide(event)" class="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        <button onclick="nextSlide(event)" class="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 hover:bg-black/60 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+
+        <!-- ClickTag Layer (Background Click) -->
+        <div onclick="handleExit()" class="absolute inset-0 z-0 cursor-pointer"></div>
+    </div>
+
+    <!-- Lead Modal -->
+    <div id="modal" class="modal-overlay fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+        <div class="modal-content bg-white rounded-xl shadow-2xl w-[400px] overflow-hidden relative">
+            <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-800 z-10">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+            </button>
+            
+            <div class="bg-blue-900 p-5 text-white">
+                <h3 class="font-display font-bold text-xl">Garanta sua Bolsa</h3>
+                <p id="modal-course" class="text-blue-200 text-sm mt-1">Interesse em: ...</p>
+            </div>
+
+            <div class="p-6">
+                <form onsubmit="submitLead(event)" id="lead-form" class="space-y-3">
+                    <input required type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm" placeholder="Seu nome completo">
+                    <input required type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm" placeholder="seu@email.com">
+                    <input required type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm" placeholder="(00) 90000-0000">
+                    
+                    <button type="submit" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-lg shadow-md transition-transform active:scale-95">
+                        QUERO ME INSCREVER
+                    </button>
+                </form>
+                
+                <div id="success-msg" class="hidden text-center py-4">
+                    <div class="inline-flex bg-green-100 text-green-600 rounded-full p-3 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m22 4-12 12-4-4"/></svg>
+                    </div>
+                    <h4 class="font-bold text-gray-900">Inscrição Enviada!</h4>
+                    <p class="text-xs text-gray-500">Entraremos em contato em breve.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION (Paste your JSON exported from the React App here) ---
+        const OFFERS = [
+            {
+                id: '1',
+                course: 'Medicina',
+                headline: 'O Futuro da Medicina',
+                subtitle: 'Laboratórios de ponta e hospital escola próprio.',
+                discount: 'Bolsas de até 100%',
+                ctaText: 'Inscreva-se Agora',
+                colorFrom: 'from-blue-900',
+                colorTo: 'to-blue-600',
+                image: 'https://picsum.photos/400/250?random=1'
+            },
+            {
+                id: '2',
+                course: 'Direito',
+                headline: 'Defenda Seus Ideais',
+                subtitle: 'Corpo docente formado por mestres e doutores.',
+                discount: '50% de Desconto',
+                ctaText: 'Quero Minha Vaga',
+                colorFrom: 'from-red-900',
+                colorTo: 'to-red-700',
+                image: 'https://picsum.photos/400/250?random=2'
+            },
+            {
+                id: '3',
+                course: 'Engenharia',
+                headline: 'Programe o Mundo',
+                subtitle: 'Alta empregabilidade e parcerias globais.',
+                discount: 'Matrícula Grátis',
+                ctaText: 'Saiba Mais',
+                colorFrom: 'from-emerald-900',
+                colorTo: 'to-emerald-600',
+                image: 'https://picsum.photos/400/250?random=3'
+            }
+        ];
+
+        // --- STATE ---
+        let currentIndex = 0;
+        let interval;
+        let isPaused = false;
+
+        // --- INITIALIZATION ---
+        function init() {
+            const container = document.getElementById('slides-container');
+            
+            OFFERS.forEach((offer, index) => {
+                const slide = document.createElement('div');
+                slide.className = `slide absolute inset-0 w-full h-full ${index === 0 ? 'active' : ''}`;
+                slide.id = `slide-${index}`;
+                
+                slide.innerHTML = `
+                    <div class="absolute inset-0 bg-gradient-to-r ${offer.colorFrom} ${offer.colorTo} opacity-95"></div>
+                    <div class="absolute inset-0 opacity-20 mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]"></div>
+                    
+                    <div class="relative z-20 h-full grid grid-cols-12 gap-4 items-center px-8 text-white pointer-events-none">
+                        <div class="col-span-7 flex flex-col justify-center space-y-2 slide-content">
+                            <div class="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full w-fit mb-2 border border-white/30">
+                                <span class="text-xs font-bold uppercase tracking-wider text-yellow-100">${offer.discount}</span>
+                            </div>
+                            <h2 class="font-display font-extrabold text-4xl leading-tight drop-shadow-lg">${offer.headline}</h2>
+                            <p class="font-light text-lg text-gray-100 max-w-lg leading-snug">${offer.subtitle}</p>
+                            <div class="flex items-center space-x-2 text-sm font-medium opacity-80 mt-1">
+                                <span class="uppercase tracking-widest">${offer.course}</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-span-5 h-full relative flex items-center justify-center">
+                            <div class="absolute right-4 top-1/2 -translate-y-1/2 w-48 h-48 rounded-full border-4 border-white/20 overflow-hidden shadow-2xl slide-img">
+                                <img src="${offer.image}" alt="${offer.course}" class="w-full h-full object-cover">
+                            </div>
+                            <button onclick="openModal(event, '${offer.course}')" class="pointer-events-auto absolute -bottom-4 right-32 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-lg py-3 px-8 rounded-full shadow-lg flex items-center space-x-2 group transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95 cursor-pointer z-50">
+                                <span>${offer.ctaText}</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 group-hover:translate-x-1 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(slide);
+            });
+
+            startAutoPlay();
+            
+            // Hover pause logic
+            const banner = document.getElementById('banner');
+            banner.addEventListener('mouseenter', pause);
+            banner.addEventListener('mouseleave', resume);
+        }
+
+        // --- CAROUSEL LOGIC ---
+        function showSlide(index) {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.getElementById(`slide-${index}`).classList.add('active');
+            currentIndex = index;
+            
+            // Reset Animation Progress Bar
+            const bar = document.getElementById('progress');
+            bar.style.animation = 'none';
+            bar.offsetHeight; /* trigger reflow */
+            if (!isPaused) bar.style.animation = 'progress 5s linear infinite';
+        }
+
+        function nextSlide(e) {
+            if(e) e.stopPropagation();
+            let next = (currentIndex + 1) % OFFERS.length;
+            showSlide(next);
+        }
+
+        function prevSlide(e) {
+            if(e) e.stopPropagation();
+            let prev = (currentIndex - 1 + OFFERS.length) % OFFERS.length;
+            showSlide(prev);
+        }
+
+        function startAutoPlay() {
+            clearInterval(interval);
+            interval = setInterval(() => {
+                if (!isPaused) nextSlide();
+            }, 5000);
+        }
+
+        function pause() {
+            isPaused = true;
+            document.getElementById('banner').classList.add('paused');
+        }
+
+        function resume() {
+            if (document.getElementById('modal').classList.contains('open')) return;
+            isPaused = false;
+            document.getElementById('banner').classList.remove('paused');
+        }
+
+        // --- GAM CLICKTAG LOGIC ---
+        function handleExit() {
+            window.open(window.clickTag, '_blank');
+        }
+
+        // --- MODAL LOGIC ---
+        function openModal(e, course) {
+            if(e) e.stopPropagation();
+            pause();
+            document.getElementById('modal-course').innerHTML = `Interesse em: <span class="font-bold text-white">${course}</span>`;
+            document.getElementById('modal').classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('open');
+            document.getElementById('success-msg').classList.add('hidden');
+            document.getElementById('lead-form').classList.remove('hidden');
+            document.getElementById('lead-form').reset();
+            resume();
+        }
+
+        function submitLead(e) {
+            e.preventDefault();
+            // Simulate API Call
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "Enviando...";
+            btn.disabled = true;
+
+            setTimeout(() => {
+                document.getElementById('lead-form').classList.add('hidden');
+                document.getElementById('success-msg').classList.remove('hidden');
+                btn.innerText = originalText;
+                btn.disabled = false;
+                
+                setTimeout(closeModal, 2000);
+            }, 1500);
+        }
+
+        // Boot
+        window.onload = init;
+
+    </script>
+</body>
+</html>
