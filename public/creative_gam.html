@@ -74,14 +74,14 @@
             transform: translateX(0); 
         }
         
-        /* Image Scale/Fade */
+        /* Image Scale/Fade - FIX: Combine translateY with scale to preserve centering */
         .slide-image-wrapper { 
-            transform: scale(0.75); 
+            transform: translateY(-50%) scale(0.75); 
             opacity: 0; 
             transition: all 1000ms ease-in-out; 
         }
         .slide.active .slide-image-wrapper { 
-            transform: scale(1); 
+            transform: translateY(-50%) scale(1); 
             opacity: 1; 
         }
 
@@ -313,8 +313,8 @@
                         
                         <!-- Right: Image & CTA (Cols 8-12) - Fixed Absolute Positioning -->
                         <div class="col-span-5 h-full relative">
-                            <!-- Image Mask: Fixed Absolute -->
-                            <div class="slide-image-wrapper absolute right-8 top-1/2 -translate-y-1/2 w-52 h-52 rounded-full border-4 border-white/20 overflow-hidden shadow-2xl z-10">
+                            <!-- Image Mask: Fixed Absolute, class handles centering via CSS -->
+                            <div class="slide-image-wrapper absolute right-8 top-1/2 w-52 h-52 rounded-full border-4 border-white/20 overflow-hidden shadow-2xl z-10">
                                 <img src="${offer.image}" alt="${offer.course}" class="w-full h-full object-cover"/>
                             </div>
                             <!-- CTA Button: Fixed Absolute (z-20 to sit on top) -->
