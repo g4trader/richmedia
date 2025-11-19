@@ -10,7 +10,8 @@ export const DEFAULT_OFFERS: OfferData[] = [
     ctaText: 'Inscreva-se Agora',
     colorFrom: 'from-blue-900',
     colorTo: 'to-blue-600',
-    image: 'https://picsum.photos/400/250?random=1'
+    // Using a vertical placeholder to simulate a person cutout
+    image: 'https://placehold.co/300x500/png?text=Medico+Recortado'
   },
   {
     id: '2',
@@ -21,7 +22,7 @@ export const DEFAULT_OFFERS: OfferData[] = [
     ctaText: 'Quero Minha Vaga',
     colorFrom: 'from-red-900',
     colorTo: 'to-red-700',
-    image: 'https://picsum.photos/400/250?random=2'
+    image: 'https://placehold.co/300x500/png?text=Advogada+Recortada'
   },
   {
     id: '3',
@@ -32,6 +33,6 @@ export const DEFAULT_OFFERS: OfferData[] = [
     ctaText: 'Saiba Mais',
     colorFrom: 'from-emerald-900',
     colorTo: 'to-emerald-600',
-    image: 'https://picsum.photos/400/250?random=3'
+    image: 'https://placehold.co/300x500/png?text=Dev+Recortado'
   }
 ];

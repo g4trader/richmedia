@@ -1,7 +1,8 @@
 import React, { useState, useRef } from 'react';
 import { generateMarketingCopy } from '../services/geminiService';
+import { GoogleGenAI } from "@google/genai";
 import { OfferData, BannerState } from '../types';
-import { Sparkles, Plus, Loader2, Download, Upload, FileJson } from 'lucide-react';
+import { Sparkles, Plus, Loader2, Download, Upload, FileJson, Image as ImageIcon } from 'lucide-react';
 
 interface AdminPanelProps {
   offers: OfferData[];
@@ -12,6 +13,7 @@ interface AdminPanelProps {
 export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUpdateOffers }) => {
   const [courseName, setCourseName] = useState('');
   const [state, setState] = useState<BannerState>(BannerState.IDLE);
+  const [imgGenState, setImgGenState] = useState<Record<string, boolean>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleGenerate = async () => {
@@ -30,7 +32,8 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
         ctaText: generatedData.ctaText || 'Saiba Mais',
         colorFrom: generatedData.colorFrom || 'from-indigo-900',
         colorTo: generatedData.colorTo || 'to-indigo-600',
-        image: `https://picsum.photos/400/250?seed=${Date.now()}`
+        // Default placeholder, user can generate better one later
+        image: `https://placehold.co/400x600/transparent/FFFFFF/png?text=${courseName}`
       };
 
       onAddOffer(newOffer);
@@ -42,6 +45,47 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
     } catch (e) {
       setState(BannerState.ERROR);
       setTimeout(() => setState(BannerState.IDLE), 3000);
+    }
+  };
+
+  const handleGenerateImage = async (offerId: string, course: string) => {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+        alert("API Key missing");
+        return;
+    }
+    
+    setImgGenState(prev => ({...prev, [offerId]: true}));
+    
+    try {
+        const ai = new GoogleGenAI({ apiKey });
+        // Using Imagen model for generation
+        const response = await ai.models.generateImages({
+            model: 'imagen-3.0-generate-001',
+            prompt: `A professional studio photo of a happy brazilian university student studying ${course}, white background, cutout style, high quality, full body shot`,
+            config: {
+                numberOfImages: 1,
+                aspectRatio: '9:16',
+                outputMimeType: 'image/png'
+            }
+        });
+
+        const base64Image = response.generatedImages?.[0]?.image?.imageBytes;
+        
+        if (base64Image) {
+            const imageUrl = `data:image/png;base64,${base64Image}`;
+            const updatedOffers = offers.map(o => 
+                o.id === offerId ? { ...o, image: imageUrl } : o
+            );
+            onUpdateOffers(updatedOffers);
+        } else {
+            alert("Could not generate image.");
+        }
+    } catch (error) {
+        console.error(error);
+        alert("Error generating image. Try again.");
+    } finally {
+        setImgGenState(prev => ({...prev, [offerId]: false}));
     }
   };
 
@@ -84,13 +128,13 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
   };
 
   return (
-    <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-3xl mx-auto">
+    <div className="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6 max-w-3xl mx-auto w-full">
       
       {/* AI Generator Section */}
       <div className="mb-6 border-b border-gray-100 pb-6">
         <div className="flex items-center space-x-2 mb-4 text-gray-800">
           <Sparkles className="w-5 h-5 text-purple-600" />
-          <h3 className="font-bold text-lg">AI Campaign Generator</h3>
+          <h3 className="font-bold text-lg">Nova Campanha (Copywriting)</h3>
         </div>
         
         <div className="flex flex-col sm:flex-row gap-3">
@@ -98,7 +142,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
             type="text" 
             value={courseName}
             onChange={(e) => setCourseName(e.target.value)}
-            placeholder="Enter a course name (e.g. 'Arquitetura', 'Psicologia')..."
+            placeholder="Nome do curso (ex: Arquitetura, Psicologia)..."
             className="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-purple-500 outline-none"
             disabled={state === BannerState.GENERATING}
           />
@@ -116,30 +160,46 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
             {state === BannerState.GENERATING ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Generating...
+                Gerando...
               </>
             ) : (
               <>
                 <Plus className="w-4 h-4 mr-2" />
-                Add Campaign
+                Criar Oferta
               </>
             )}
           </button>
         </div>
+      </div>
 
-        {state === BannerState.SUCCESS && (
-          <p className="text-green-600 text-sm mt-2">Campaign generated and added to carousel successfully!</p>
-        )}
-        {state === BannerState.ERROR && (
-          <p className="text-red-600 text-sm mt-2">Failed to generate campaign. Check your API Key.</p>
-        )}
+      {/* Active Campaigns List with Image Gen */}
+      <div className="mb-6 border-b border-gray-100 pb-6">
+        <h3 className="font-bold text-lg text-gray-800 mb-3">Campanhas Ativas</h3>
+        <div className="space-y-3">
+            {offers.map((offer) => (
+                <div key={offer.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <div>
+                        <span className="font-bold text-gray-700">{offer.course}</span>
+                        <p className="text-xs text-gray-500 truncate max-w-[200px]">{offer.headline}</p>
+                    </div>
+                    <button 
+                        onClick={() => handleGenerateImage(offer.id, offer.course)}
+                        disabled={imgGenState[offer.id]}
+                        className="text-xs flex items-center px-3 py-1 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-md transition-colors"
+                    >
+                        {imgGenState[offer.id] ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImageIcon className="w-3 h-3 mr-1" />}
+                        Gerar Foto
+                    </button>
+                </div>
+            ))}
+        </div>
       </div>
 
       {/* Data Management Section */}
       <div>
         <div className="flex items-center space-x-2 mb-3 text-gray-800">
           <FileJson className="w-5 h-5 text-blue-600" />
-          <h3 className="font-bold text-lg">Data Management</h3>
+          <h3 className="font-bold text-lg">Gestão de Dados</h3>
         </div>
         <div className="flex space-x-3">
           <button 
@@ -147,7 +207,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
             className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
           >
             <Download className="w-4 h-4 mr-2" />
-            Export Config (JSON)
+            Salvar JSON
           </button>
           
           <button 
@@ -155,7 +215,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
             className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors"
           >
             <Upload className="w-4 h-4 mr-2" />
-            Import Config
+            Carregar JSON
           </button>
           <input 
             type="file" 
@@ -165,9 +225,6 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
             className="hidden"
           />
         </div>
-        <p className="text-xs text-gray-400 mt-2">
-          Save your AI-generated campaigns to a JSON file to share or restore later.
-        </p>
       </div>
     </div>
   );

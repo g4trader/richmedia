@@ -26,7 +26,6 @@
                     }
                 }
             },
-            // CRITICAL: Safelist the dynamic color classes so Tailwind generates them
             safelist: [
                 'from-blue-900', 'to-blue-600',
                 'from-red-900', 'to-red-700',
@@ -37,9 +36,10 @@
                 'text-yellow-400', 'fill-yellow-400',
                 'bg-yellow-400', 'hover:bg-yellow-300',
                 'group-hover:translate-x-1',
-                'border-white/20', 'border-white/30',
-                'right-48', 'bottom-8', 'w-52', 'h-52', 'right-8', // Positioning classes
-                'line-clamp-2' // Text clamping
+                'border-white/30',
+                'bottom-6', 'left-10', // Updated CTA Position
+                'line-clamp-2',
+                'pt-8' // Updated Text Padding
             ]
         }
     </script>
@@ -74,14 +74,14 @@
             transform: translateX(0); 
         }
         
-        /* Image Scale/Fade - FIX: Combine translateY with scale to preserve centering */
-        .slide-image-wrapper { 
-            transform: translateY(-50%) scale(0.75); 
+        /* Person Slide Up Animation */
+        .slide-person { 
+            transform: translateY(100%); 
             opacity: 0; 
-            transition: all 1000ms ease-in-out; 
+            transition: all 1000ms ease-out; 
         }
-        .slide.active .slide-image-wrapper { 
-            transform: translateY(-50%) scale(1); 
+        .slide.active .slide-person { 
+            transform: translateY(0); 
             opacity: 1; 
         }
 
@@ -130,7 +130,6 @@
 <body>
 
     <!-- Main Container -->
-    <!-- Added click handler for ClickTag on the background area -->
     <div id="banner-root" class="relative w-[970px] h-[250px] bg-gray-900 overflow-hidden group cursor-pointer" 
          onmouseenter="handleMouseEnter()" 
          onmouseleave="handleMouseLeave()"
@@ -159,24 +158,17 @@
         <div id="progress-bar" class="absolute bottom-0 left-0 h-1 bg-yellow-400/50 z-40 w-full scale-x-0 animate-progress"></div>
     </div>
 
-    <!-- Lead Modal -->
+    <!-- Lead Modal (Same as before) -->
     <div id="modal" class="modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative overflow-hidden" onclick="event.stopPropagation()">
-            
-            <!-- Close Button -->
             <button onclick="closeModal()" class="absolute top-4 right-4 text-white/70 hover:text-white z-50 cursor-pointer">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
             </button>
-
-            <!-- Header -->
             <div class="bg-blue-900 p-6 text-white">
                 <h3 class="font-display font-bold text-2xl">Garanta sua Bolsa</h3>
                 <p class="text-blue-200 text-sm mt-1">Interesse em: <span id="modal-course-name" class="font-bold text-white">...</span></p>
             </div>
-
-            <!-- Body -->
             <div class="p-6" id="modal-body">
-                <!-- Form -->
                 <form id="lead-form" onsubmit="submitForm(event)" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
@@ -190,19 +182,11 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
                         <input required type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="seu@email.com" />
                     </div>
-                    <button 
-                        type="submit" 
-                        id="submit-btn"
-                        class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-lg shadow-md transform transition-all active:scale-95 flex justify-center items-center cursor-pointer"
-                    >
+                    <button type="submit" id="submit-btn" class="w-full bg-yellow-400 hover:bg-yellow-300 text-black font-bold py-3 rounded-lg shadow-md transform transition-all active:scale-95 flex justify-center items-center cursor-pointer">
                         QUERO ME INSCREVER
                     </button>
-                    <p class="text-xs text-center text-gray-400 mt-2">
-                        Ao enviar, você concorda com nossa Política de Privacidade.
-                    </p>
+                    <p class="text-xs text-center text-gray-400 mt-2">Ao enviar, você concorda com nossa Política de Privacidade.</p>
                 </form>
-
-                <!-- Success State -->
                 <div id="success-view" class="hidden flex-col items-center justify-center py-8 text-center space-y-4 animate-zoom-in">
                     <div class="w-16 h-16 bg-green-100 text-green-600 rounded-full flex items-center justify-center">
                         <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-10 h-10"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m22 4-12 12-4-4"/></svg>
@@ -217,7 +201,7 @@
     </div>
 
     <script>
-        // Data from constants.ts
+        // Default Data
         const OFFERS = [
             {
                 id: '1',
@@ -228,7 +212,7 @@
                 ctaText: 'Inscreva-se Agora',
                 colorFrom: 'from-blue-900',
                 colorTo: 'to-blue-600',
-                image: 'https://picsum.photos/400/250?random=1'
+                image: 'https://placehold.co/400x600/transparent/FFFFFF/png?text=MEDICINA'
             },
             {
                 id: '2',
@@ -239,7 +223,7 @@
                 ctaText: 'Quero Minha Vaga',
                 colorFrom: 'from-red-900',
                 colorTo: 'to-red-700',
-                image: 'https://picsum.photos/400/250?random=2'
+                image: 'https://placehold.co/400x600/transparent/FFFFFF/png?text=DIREITO'
             },
             {
                 id: '3',
@@ -250,7 +234,7 @@
                 ctaText: 'Saiba Mais',
                 colorFrom: 'from-emerald-900',
                 colorTo: 'to-emerald-600',
-                image: 'https://picsum.photos/400/250?random=3'
+                image: 'https://placehold.co/400x600/transparent/FFFFFF/png?text=SOFTWARE'
             }
         ];
 
@@ -287,15 +271,15 @@
                 slide.className = `slide absolute inset-0 w-full h-full ${index === 0 ? 'active' : ''}`;
                 slide.dataset.index = index;
                 
-                // We use style for the pattern to ensure it loads even if Tailwind arbitrary value parsing is slow
                 slide.innerHTML = `
                     <div class="absolute inset-0 bg-gradient-to-r ${offer.colorFrom} ${offer.colorTo} opacity-95"></div>
                     <div class="absolute inset-0 opacity-20 mix-blend-overlay" style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png');"></div>
                     
-                    <div class="relative z-20 h-full grid grid-cols-12 gap-4 items-center px-10 text-white">
+                    <div class="relative z-20 h-full grid grid-cols-12 gap-4 px-10 text-white">
+                        
                         <!-- Left: Text Content (Cols 1-7) -->
-                        <div class="col-span-7 flex flex-col justify-center space-y-2 slide-content">
-                            <div class="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full w-fit mb-2 border border-white/30">
+                        <div class="col-span-7 flex flex-col pt-8 space-y-3 slide-content">
+                            <div class="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full w-fit border border-white/30">
                                 ${ICON_STAR}
                                 <span class="text-xs font-bold uppercase tracking-wider text-yellow-100">${offer.discount}</span>
                             </div>
@@ -305,23 +289,22 @@
                             <p class="font-light text-lg text-gray-100 max-w-lg leading-snug line-clamp-2">
                                 ${offer.subtitle}
                             </p>
-                            <div class="flex items-center space-x-2 text-sm font-medium opacity-80 mt-1">
+                            <div class="flex items-center space-x-2 text-sm font-medium opacity-80 pt-1">
                                 ${ICON_CAP}
                                 <span class="uppercase tracking-widest">${offer.course}</span>
                             </div>
                         </div>
                         
-                        <!-- Right: Image & CTA (Cols 8-12) - Fixed Absolute Positioning -->
+                        <!-- CTA Button: Fixed Absolute Left-Aligned -->
+                        <!-- Adjusted bottom position to avoid overlap -->
+                        <button onclick="openModal(event, '${index}')" class="cta-button absolute bottom-6 left-10 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-lg py-3 px-8 rounded-full shadow-lg shadow-black/30 flex items-center space-x-2 group transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95 cursor-pointer z-30">
+                            <span class="whitespace-nowrap">${offer.ctaText}</span>
+                            ${ICON_ARROW}
+                        </button>
+
+                        <!-- Right: Image Cutout (Cols 8-12) -->
                         <div class="col-span-5 h-full relative">
-                            <!-- Image Mask: Fixed Absolute, class handles centering via CSS -->
-                            <div class="slide-image-wrapper absolute right-8 top-1/2 w-52 h-52 rounded-full border-4 border-white/20 overflow-hidden shadow-2xl z-10">
-                                <img src="${offer.image}" alt="${offer.course}" class="w-full h-full object-cover"/>
-                            </div>
-                            <!-- CTA Button: Fixed Absolute (z-20 to sit on top) -->
-                            <button onclick="openModal(event, '${index}')" class="cta-button absolute bottom-8 right-48 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-lg py-3 px-8 rounded-full shadow-lg shadow-black/30 flex items-center space-x-2 group transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95 cursor-pointer z-20">
-                                <span class="whitespace-nowrap">${offer.ctaText}</span>
-                                ${ICON_ARROW}
-                            </button>
+                            <img src="${offer.image}" alt="${offer.course}" class="slide-person absolute bottom-0 right-0 max-h-[95%] w-auto object-contain drop-shadow-2xl"/>
                         </div>
                     </div>
                 `;
@@ -404,14 +387,10 @@
             }
         }
 
-        // Handle background click for generic clickTag
         function handleBackgroundClick(e) {
-            // If the click target is a button or inside a button, do nothing (handled by specific logic)
             if (e.target.closest('button') || e.target.closest('#modal')) {
                 return;
             }
-            
-            // Otherwise, trigger ClickTag
             if (typeof window.clickTag !== 'undefined') {
                 window.open(window.clickTag, '_blank');
             } else {
@@ -420,7 +399,7 @@
         }
 
         function openModal(e, indexStr) {
-            e.stopPropagation(); // Prevent background clickTag
+            e.stopPropagation();
             const index = parseInt(indexStr);
             const offer = OFFERS[index];
             modalCourseName.innerText = offer.course;
