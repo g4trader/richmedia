@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { generateMarketingCopy } from '../services/geminiService';
 import { GoogleGenAI } from "@google/genai";
 import { OfferData, BannerState } from '../types';
-import { Sparkles, Plus, Loader2, Download, Upload, FileJson, Image as ImageIcon } from 'lucide-react';
+import { Sparkles, Plus, Loader2, Download, Upload, FileJson, Image as ImageIcon, Copy } from 'lucide-react';
 
 interface AdminPanelProps {
   offers: OfferData[];
@@ -14,6 +14,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
   const [courseName, setCourseName] = useState('');
   const [state, setState] = useState<BannerState>(BannerState.IDLE);
   const [imgGenState, setImgGenState] = useState<Record<string, boolean>>({});
+  const [promptGenLoading, setPromptGenLoading] = useState<Record<string, boolean>>({});
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleGenerate = async () => {
@@ -48,6 +49,41 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
     }
   };
 
+  const handleCopyPrompt = async (course: string, id: string) => {
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) return alert("API Key missing");
+
+    setPromptGenLoading(prev => ({...prev, [id]: true}));
+
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Create a highly detailed image generation prompt (optimized for Midjourney v6 or DALL-E 3) for a commercial studio photo of a Brazilian university student studying "${course}".
+        
+        Requirements:
+        - Subject: Young adult, happy, confident, holding an object related to ${course}.
+        - Style: High-end commercial advertising photography, sharp focus.
+        - Background: Plain solid white background (important for easy cutout).
+        - Lighting: Professional studio lighting, softbox.
+        - Shot: Full body or 3/4 body shot, standing.
+        
+        Output ONLY the prompt text in English, no other words.`
+      });
+
+      const prompt = response.text;
+      if (prompt) {
+        await navigator.clipboard.writeText(prompt);
+        alert("Prompt copiado! Cole no ChatGPT, Midjourney ou DALL-E.");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Erro ao gerar prompt.");
+    } finally {
+      setPromptGenLoading(prev => ({...prev, [id]: false}));
+    }
+  };
+
   const handleGenerateImage = async (offerId: string, course: string) => {
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
@@ -59,10 +95,10 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
     
     try {
         const ai = new GoogleGenAI({ apiKey });
-        // Using Imagen model for generation
+        // Updated to supported model version
         const response = await ai.models.generateImages({
-            model: 'imagen-3.0-generate-001',
-            prompt: `A professional studio photo of a happy brazilian university student studying ${course}, white background, cutout style, high quality, full body shot`,
+            model: 'imagen-4.0-generate-001',
+            prompt: `Professional studio photo of a happy brazilian university student studying ${course}, holding a related item, isolated on white background, full body shot, commercial photography, 8k resolution`,
             config: {
                 numberOfImages: 1,
                 aspectRatio: '9:16',
@@ -83,7 +119,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
         }
     } catch (error) {
         console.error(error);
-        alert("Error generating image. Try again.");
+        alert("Erro ao gerar imagem. Tente usar o botão 'Prompt' e gerar externamente.");
     } finally {
         setImgGenState(prev => ({...prev, [offerId]: false}));
     }
@@ -182,14 +218,25 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ offers, onAddOffer, onUp
                         <span className="font-bold text-gray-700">{offer.course}</span>
                         <p className="text-xs text-gray-500 truncate max-w-[200px]">{offer.headline}</p>
                     </div>
-                    <button 
-                        onClick={() => handleGenerateImage(offer.id, offer.course)}
-                        disabled={imgGenState[offer.id]}
-                        className="text-xs flex items-center px-3 py-1 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-md transition-colors"
-                    >
-                        {imgGenState[offer.id] ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImageIcon className="w-3 h-3 mr-1" />}
-                        Gerar Foto
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <button 
+                          onClick={() => handleCopyPrompt(offer.course, offer.id)}
+                          disabled={promptGenLoading[offer.id]}
+                          className="text-xs flex items-center px-3 py-1 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-md transition-colors border border-gray-300"
+                          title="Copiar prompt para usar no ChatGPT/Midjourney"
+                      >
+                          {promptGenLoading[offer.id] ? <Loader2 className="w-3 h-3 animate-spin" /> : <Copy className="w-3 h-3 mr-1" />}
+                          Prompt
+                      </button>
+                      <button 
+                          onClick={() => handleGenerateImage(offer.id, offer.course)}
+                          disabled={imgGenState[offer.id]}
+                          className="text-xs flex items-center px-3 py-1 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-md transition-colors"
+                      >
+                          {imgGenState[offer.id] ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImageIcon className="w-3 h-3 mr-1" />}
+                          Gerar Foto
+                      </button>
+                    </div>
                 </div>
             ))}
         </div>

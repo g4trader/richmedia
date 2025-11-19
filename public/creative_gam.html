@@ -39,7 +39,9 @@
                 'border-white/30',
                 'bottom-6', 'left-10', // Updated CTA Position
                 'line-clamp-2',
-                'pt-8' // Updated Text Padding
+                'pt-8', // Updated Text Padding
+                'rounded-xl', // Added for border radius
+                'shadow-2xl'  // Added for shadow
             ]
         }
     </script>
@@ -48,7 +50,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Roboto', sans-serif; background: #111827; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Roboto', sans-serif; background: transparent; }
         
         /* --- Animations --- */
         
@@ -130,7 +132,7 @@
 <body>
 
     <!-- Main Container -->
-    <div id="banner-root" class="relative w-[970px] h-[250px] bg-gray-900 overflow-hidden group cursor-pointer" 
+    <div id="banner-root" class="relative w-[970px] h-[250px] bg-gray-900 rounded-xl shadow-2xl overflow-hidden group cursor-pointer" 
          onmouseenter="handleMouseEnter()" 
          onmouseleave="handleMouseLeave()"
          onclick="handleBackgroundClick(event)">
