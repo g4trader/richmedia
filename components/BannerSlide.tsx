@@ -25,37 +25,36 @@ export const BannerSlide: React.FC<BannerSlideProps> = ({ data, isActive, onCtaC
       <div className="relative z-20 h-full grid grid-cols-12 gap-4 px-10 text-white">
         
         {/* Left: Text Content (Cols 1-7) */}
-        {/* Adjusted padding-top to pt-6 (higher up) to create space for CTA */}
-        <div className={`col-span-7 flex flex-col pt-6 space-y-3 transform transition-transform duration-700 delay-100 ${isActive ? 'translate-x-0' : '-translate-x-10'}`}>
+        {/* COMPACTED LAYOUT: Reduced pt-6 to pt-5, space-y-3 to space-y-2 */}
+        <div className={`col-span-7 flex flex-col pt-5 space-y-2 transform transition-transform duration-700 delay-100 ${isActive ? 'translate-x-0' : '-translate-x-10'}`}>
           
           {/* Badge */}
-          <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full w-fit border border-white/30">
+          <div className="inline-flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-0.5 rounded-full w-fit border border-white/30">
             <Star className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-            <span className="text-xs font-bold uppercase tracking-wider text-yellow-100">{data.discount}</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-yellow-100">{data.discount}</span>
           </div>
 
-          {/* Main Headline - Limited to 2 lines */}
-          <h2 className="font-display font-extrabold text-4xl leading-tight drop-shadow-lg line-clamp-2 h-[3.6rem]">
+          {/* Main Headline - Reduced to text-3xl to fit 2 lines vertically */}
+          <h2 className="font-display font-extrabold text-3xl leading-tight drop-shadow-lg line-clamp-2">
             {data.headline}
           </h2>
 
-          {/* Subtitle - Limited to 2 lines */}
-          <p className="font-light text-lg text-gray-100 max-w-lg leading-snug line-clamp-2">
+          {/* Subtitle - Reduced to text-base */}
+          <p className="font-light text-base text-gray-100 max-w-lg leading-snug line-clamp-2">
             {data.subtitle}
           </p>
           
           {/* Course Name Tag */}
-          <div className="flex items-center space-x-2 text-sm font-medium opacity-80 pt-1">
+          <div className="flex items-center space-x-2 text-xs font-medium opacity-80 pt-1">
             <GraduationCap className="w-4 h-4" />
             <span className="uppercase tracking-widest">{data.course}</span>
           </div>
         </div>
 
         {/* CTA Button - Fixed Absolute Position Bottom Left */}
-        {/* Adjusted to bottom-4 (lower down) to avoid text overlap */}
         <button
           onClick={onCtaClick}
-          className={`absolute bottom-4 left-10 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-lg py-3 px-8 rounded-full shadow-lg shadow-black/30 flex items-center space-x-2 group transition-all duration-300 z-30 transform hover:-translate-y-1 hover:scale-105 active:scale-95 ${isActive ? 'animate-bounce-subtle' : ''}`}
+          className={`absolute bottom-4 left-10 bg-yellow-400 hover:bg-yellow-300 text-black font-black text-lg py-2.5 px-8 rounded-full shadow-lg shadow-black/30 flex items-center space-x-2 group transition-all duration-300 z-30 transform hover:-translate-y-1 hover:scale-105 active:scale-95 ${isActive ? 'animate-bounce-subtle' : ''}`}
         >
           <span className="whitespace-nowrap">{data.ctaText}</span>
           <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
